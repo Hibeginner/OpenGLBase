@@ -23,6 +23,8 @@ bool CGfxOpenGL::Init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	m_angle = 0.0f;
 
+	//glEnable(GL_DEPTH_TEST);//深度测试，近的挡住远的
+
 	//GLfloat pointSize;
 	//glGetFloatv(GL_POINT_SIZE, &pointSize);//点的大小，单位为像素
 	//ShowFloat(pointSize);
