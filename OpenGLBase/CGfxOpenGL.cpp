@@ -98,7 +98,7 @@ void CGfxOpenGL::Render() {
 	//glTranslatef(0.0f, 0.0f, -5.0f);
 	//glRotated(m_angle, 0.0f, 0.0f, 1.0f);//绕着z轴转
 
-	glColor3f(7.0f, 1.0f, 0.3f);
+	//glColor3f(7.0f, 1.0f, 0.3f);
 
 	//float pointSize = 0.5f;
 	//for (float point = -4.0f; point < 5.0f; point += 0.5f) {
@@ -130,14 +130,38 @@ void CGfxOpenGL::Render() {
 	glVertex3f( 1.0f, 0.0f, -2.0f);
 	glEnd();*/
 
-	glEnable(GL_LINE_STIPPLE);//画虚线
+	//glEnable(GL_LINE_STIPPLE);//画虚线
 
-	glLineStipple(2, 0xAAAA);//1010 1010 1010 1010  虚线像素是否显示 和这个序列是相反的。第一个参数2，是每一位重复的次数 11001100 11001100 ..
-							 //目前表示 2个像素画 2个像素不画
+	//glLineStipple(2, 0xAAAA);//1010 1010 1010 1010  虚线像素是否显示 和这个序列是相反的。第一个参数2，是每一位重复的次数 11001100 11001100 ..
+	//						 //目前表示 2个像素画 2个像素不画
 
-	glLineWidth(6.55);
-	glBegin(GL_LINES);
-	glVertex3f(-5.0f, 0.0f, 0.0f);
-	glVertex3f(5.0f, 0.0f, -2.0f);
+	//glLineWidth(6.55);
+	//glBegin(GL_LINES);
+	//glVertex3f(-5.0f, 0.0f, 0.0f);
+	//glVertex3f(5.0f, 0.0f, -2.0f);
+	//glEnd();
+
+	//glPolygonMode(GL_FRONT, GL_LINE);//正面、线框的样式。默认GL_FRONT_AND_BACK,GL_FILL
+	//glCullFace(GL_BACK);//指定要剔除的面为背面。背面不画
+	//glEnable(GL_CULL_FACE);//启动“剔除面”
+	//glFrontFace(GL_CW);//设置正面，为顺时针。默认是GL_CCW与三角形画的顺序有关
+	//glBegin(GL_TRIANGLES);//GL_TRIANGLE_STRIP三角形带（逆时针画三角形） GL_TRIANGLE_FAN（扇形）起点公用
+	//glEdgeFlag(GL_TRUE);//控制边显不显示
+	//glVertex3f(0.0, 5.0, 0.0);
+	//glVertex3f(0.0, 0.0, 0.0);
+	//glVertex3f(3.0, 5.0, 0.0);
+	//glEnd();
+
+	//GL_QUADS四边形
+	//GL_QUAD_STRIP四边形带 有顺序的  上下上下
+	//GL_POLYGON逆时针方向连续多个定点
+
+	glBegin(GL_TRIANGLES);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex3f(0.0, 5.0, 0.0);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(0.0, 0.0, 0.0);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex3f(3.0, 5.0, 0.0);
 	glEnd();
 }
