@@ -1,5 +1,12 @@
 ﻿#include "stdafx.h"
 
+/*
+(x, y, z)物体的顶点坐标经过
+模型矩阵，平移缩放等，变成世界坐标
+视图矩阵，根据摄像机的位置，变成眼睛坐标、相机坐标
+投影矩阵，相机的视椎体做投影变换，远近裁剪面，梯形变成-1到1的规范的标准立方体，物体坐标就在立方体内
+视口变换，变成窗口坐标
+*/
 
 //禁止把单精度变双精度
 #pragma warning(disable:4305)
@@ -67,13 +74,14 @@ void CGfxOpenGL::SetupProjection(int width, int height) {
 		height = 1;
 	}
 
-	glViewport(0, 0, width, height);//设置OpenGL视口大小。看得见的区域。OpenGL可以很大
-	glMatrixMode(GL_PROJECTION);//设置投影矩阵
-	glLoadIdentity();//投影矩阵复位
+	glViewport(0, 0, width, height);//设置OpenGL视口大小。看得见的区域。OpenGL可以很大。矩阵变换中的最后一步，视口变换，视口矩阵，物体本地坐标变成窗口坐标
 
-	gluPerspective(45.0f, (GLfloat)width / (GLfloat)height, 1.0f, 1000.0f);//透视，近大远小。近裁剪面，远裁剪面。
+	glMatrixMode(GL_PROJECTION);//选择投影矩阵
+	glLoadIdentity();//投影矩阵设为单位矩阵。（即把相机放回原点，朝向Z轴负方向。这一句解释可能不对）
 
-	glMatrixMode(GL_MODELVIEW);//模型视图矩阵
+	gluPerspective(45.0f, (GLfloat)width / (GLfloat)height, 1.0f, 1000.0f);//透视，近大远小。近裁剪面，远裁剪面。投影变换
+
+	glMatrixMode(GL_MODELVIEW);//模型视图矩阵。OpenGL将模型矩阵和视图矩阵合二为一。
 	glLoadIdentity();
 
 	m_windowWidth = width;
