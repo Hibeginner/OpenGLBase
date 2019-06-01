@@ -21,6 +21,11 @@ public:
 
 	void SetupProjection(int width, int height);
 
+	void ResizeScene(int width, int height);//重置视口
+	void UpdateProjection(bool toggle = FALSE);//正交投影 或 透视投影
+
+	void DrawCube(float xPos, float yPos, float zPos);
+
 	void Prepare(float dt);
 	void Render();
 };

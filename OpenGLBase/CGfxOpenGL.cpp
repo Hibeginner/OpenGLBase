@@ -30,31 +30,34 @@ bool CGfxOpenGL::Init() {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	m_angle = 0.0f;
 
-	//glEnable(GL_DEPTH_TEST);//深度测试，近的挡住远的
+	glEnable(GL_DEPTH_TEST);//深度测试，近的挡住远的
+	glDepthFunc(GL_LEQUAL);//深度测试小于等于算法。只有后者距离小于等于前者，就显示后者。距离摄像机的距离越小，越优先显示
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	//GLfloat pointSize;
 	//glGetFloatv(GL_POINT_SIZE, &pointSize);//点的大小，单位为像素
 	//ShowFloat(pointSize);
 
-	if (!glIsEnabled(GL_POINT_SMOOTH)) {
-		glEnable(GL_POINT_SMOOTH);//对 GL_POINST 点 做平滑处理，显示成圆形。否则会是方形
-	}
+	//if (!glIsEnabled(GL_POINT_SMOOTH)) {
+	//	glEnable(GL_POINT_SMOOTH);//对 GL_POINST 点 做平滑处理，显示成圆形。否则会是方形
+	//}
 
-	GLfloat sizes[2];
-	glGetFloatv(GL_POINT_SIZE_RANGE, sizes);//启用点的平滑处理后，OpenGL对点的大小有要求，小于或大于这个边界的点，处理就有问题
-	GLfloat minPointSize = sizes[0];
-	GLfloat maxPointSize = sizes[1];
+	//GLfloat sizes[2];
+	//glGetFloatv(GL_POINT_SIZE_RANGE, sizes);//启用点的平滑处理后，OpenGL对点的大小有要求，小于或大于这个边界的点，处理就有问题
+	//GLfloat minPointSize = sizes[0];
+	//GLfloat maxPointSize = sizes[1];
 	//ShowFloat(minPointSize);
 	//ShowFloat(maxPointSize);
 
-	GLfloat granularity;//颗粒度
-	glGetFloatv(GL_POINT_SIZE_GRANULARITY, &granularity);
+	//GLfloat granularity;//颗粒度
+	//glGetFloatv(GL_POINT_SIZE_GRANULARITY, &granularity);
 	//ShowFloat(granularity);//0.125(应该是像素)这个间隔的点 画出来的效果最好。启用平滑处理后，画点的时候，点的大小会被OpenGL做成颗粒度的倍数
 
 
 	//  1 / (a + b*d + c*d²)衰减系数   d为距离  默认a=1 b=0 c=0
-	GLfloat att[3] = { 0.0, 0.0, 0.1 };
-	glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, att);//改变点的距离衰减
+	//GLfloat att[3] = { 0.0, 0.0, 0.1 };
+	//glPointParameterfv(GL_POINT_DISTANCE_ATTENUATION, att);//改变点的距离衰减
 														   //glPointParameteri(GL_POINT_SIZE_MAX, 2f);//衰减时，可以设置最大点大小 最小点大小 GL_POINT_FADE_THRESHOLD小的看不清 大的能看清的渐变
 
 														   //画线时也有线的粗细，斜线会出现锯齿。GL_LINE_SMOOTH可以设置抗锯齿
@@ -88,6 +91,79 @@ void CGfxOpenGL::SetupProjection(int width, int height) {
 	m_windowHeight = height;
 }
 
+void CGfxOpenGL::ResizeScene(int width, int height) {
+	if (height == 0) {
+		height = 1;
+	}
+
+	glViewport(0, 0, width, height);
+
+	UpdateProjection(false);
+}
+
+void CGfxOpenGL::UpdateProjection(bool toggle) {
+
+	static bool useProjective = true;
+	if (toggle) {
+		useProjective = !useProjective;
+	}
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	if (useProjective) {
+		glFrustum(-1.0, 1.0, -1.0, 1.0, 1, 1000.0);//用来设置视椎体。透视
+	}
+	else
+	{
+		glOrtho(-1.0, 1.0, -1.0, 1.0, 1, 1000.0);//正交
+	}
+	
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void CGfxOpenGL::DrawCube(float xPos, float yPos, float zPos)
+{
+	glPushMatrix();//将前面的矩阵压入堆栈，下面的矩阵变换不会影响之前的矩阵（之前在Render方法里有模型视图矩阵的旋转平移）。下面的矩阵也是在世界坐标系里的。好像没有任何变化
+	
+	glTranslatef(xPos, yPos, zPos);
+	
+	glBegin(GL_QUADS);
+		glVertex3f(0.0f, 0.0f, 0.0f);//top 逆时针画四方形
+		glVertex3f(0.0f, 0.0f, -1.0f);
+		glVertex3f(-1.0f, 0.0f, -1.0f);
+		glVertex3f(-1.0f, 0.0f, 0.0f);
+
+		glVertex3f(0.0f, 0.0f, 0.0f);//front
+		glVertex3f(-1.0f, 0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+		glVertex3f(0.0f, -1.0f, 0.0f);
+
+		glVertex3f(0.0f, 0.0f, 0.0f);//right
+		glVertex3f(0.0f, -1.0f, 0.0f);
+		glVertex3f(0.0f, -1.0f, -1.0f);
+		glVertex3f(0.0f, 0.0f, -1.0f);
+
+		glVertex3f(-1.0f, 0.0f, 0.0f);//left
+		glVertex3f(-1.0f, 0.0f, -1.0f);
+		glVertex3f(-1.0f, -1.0f, -1.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+
+		glVertex3f(0.0f, -1.0f, 0.0f);//bottom
+		glVertex3f(0.0f, -1.0f, -1.0f);
+		glVertex3f(-1.0f, -1.0f, -1.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+
+		glVertex3f(0.0f, 0.0f, -1.0f);//back
+		glVertex3f(-1.0f, 0.0f, -1.0f);
+		glVertex3f(-1.0f, -1.0f, -1.0f);
+		glVertex3f(0.0f, -1.0f, -1.0f);
+	glEnd();
+
+	glPopMatrix();
+}
+
 void CGfxOpenGL::Prepare(float dt) {
 	m_angle = m_angle + 0.1f;
 	if (m_angle >= 360.0f) {
@@ -100,11 +176,16 @@ void CGfxOpenGL::Render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);//清空背景。变黑
 	glLoadIdentity();
 
-	gluLookAt(0.0f, 0.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+	//gluLookAt(0.0f, 0.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 
-	//glTranslatef(0.0f, 0.0f, -5.0f);
+	glTranslatef(0.4f, 0.0f, -1.5f);
 	//glRotated(m_angle, 0.0f, 0.0f, 1.0f);//绕着z轴转
+	glRotated(15.0, 1.0f, 0.0f, 0.0f);
+	glRotated(30.0, 0.0f, 1.0f, 0.0f);
+	glScalef(0.75, 0.75, 0.75);
+
+	DrawCube(0.0, 0.0, 0.0);
 
 	//glColor3f(7.0f, 1.0f, 0.3f);
 
@@ -164,12 +245,12 @@ void CGfxOpenGL::Render() {
 	//GL_QUAD_STRIP四边形带 有顺序的  上下上下
 	//GL_POLYGON逆时针方向连续多个定点
 
-	glBegin(GL_TRIANGLES);
+	/*glBegin(GL_TRIANGLES);
 	glColor3f(1.0f, 0.0f, 0.0f);
 	glVertex3f(0.0, 5.0, 0.0);
 	glColor3f(0.0f, 1.0f, 0.0f);
 	glVertex3f(0.0, 0.0, 0.0);
 	glColor3f(0.0f, 0.0f, 1.0f);
 	glVertex3f(3.0, 5.0, 0.0);
-	glEnd();
+	glEnd();*/
 }

@@ -281,7 +281,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_SIZE://窗口改变时
 		height = HIWORD(lParam);//窗口宽高
 		width = LOWORD(lParam);
-		g_glRender->SetupProjection(width, height);
+		//g_glRender->SetupProjection(width, height);
+		g_glRender->ResizeScene(width, height);
 		break;
 	case WM_PAINT:
 	{
@@ -300,6 +301,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		fwKeys = (int)wParam;
 		keyData = lParam;
 		switch (fwKeys) {
+		case VK_SPACE:
+			g_glRender->UpdateProjection(true);
+			break;
 		case VK_ESCAPE:
 			PostQuitMessage(0);
 			break;
