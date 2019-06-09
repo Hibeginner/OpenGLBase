@@ -23,4 +23,5 @@
 #include <gl/GL.h>
 #include <gl/GLU.h>
 #include "CGfxOpenGL.h"
-
+#include "Robot.h"
+#include "HiResTimer.h"

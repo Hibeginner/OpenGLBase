@@ -23,17 +23,19 @@ CGfxOpenGL::CGfxOpenGL() {
 }
 
 CGfxOpenGL::~CGfxOpenGL() {
-
+	
 }
 
 bool CGfxOpenGL::Init() {
+	theRobot = new Robot();
 	glClearColor(0.0, 0.0, 0.0, 0.0);
-	m_angle = 0.0f;
+
+	rotateAngle = 0;
 
 	glEnable(GL_DEPTH_TEST);//深度测试，近的挡住远的
 	glDepthFunc(GL_LEQUAL);//深度测试小于等于算法。只有后者距离小于等于前者，就显示后者。距离摄像机的距离越小，越优先显示
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	//GLfloat pointSize;
 	//glGetFloatv(GL_POINT_SIZE, &pointSize);//点的大小，单位为像素
@@ -67,6 +69,7 @@ bool CGfxOpenGL::Init() {
 }
 
 bool CGfxOpenGL::Shutdown() {
+	delete theRobot;
 	return true;
 }
 
@@ -96,8 +99,10 @@ void CGfxOpenGL::ResizeScene(int width, int height) {
 		height = 1;
 	}
 
-	glViewport(0, 0, width, height);
-
+	glViewport(0, 0, width, height);//X，Y————以像素为单位，指定了视口的左下角（在第一象限内，以（0，0）为原点的）位置。width，height————表示这个视口矩形的宽度和高度，根据窗口的实时变化重绘窗口。
+	
+	m_windowWidth = width;
+	m_windowHeight = height;
 	UpdateProjection(false);
 }
 
@@ -112,7 +117,8 @@ void CGfxOpenGL::UpdateProjection(bool toggle) {
 	glLoadIdentity();
 
 	if (useProjective) {
-		glFrustum(-1.0, 1.0, -1.0, 1.0, 1, 1000.0);//用来设置视椎体。透视
+		//glFrustum(-1.0, 1.0, -1.0, 1.0, 1, 1000.0);//用来设置视椎体。透视
+		gluPerspective(52.0f, (GLfloat)m_windowWidth / (GLfloat)m_windowHeight, 1.0f, 1000.0f);//透视，近大远小。近裁剪面，远裁剪面。投影变换
 	}
 	else
 	{
@@ -165,10 +171,12 @@ void CGfxOpenGL::DrawCube(float xPos, float yPos, float zPos)
 }
 
 void CGfxOpenGL::Prepare(float dt) {
-	m_angle = m_angle + 0.1f;
-	if (m_angle >= 360.0f) {
-		m_angle = 0.0f;
+	rotateAngle += 45.0f * dt;
+	if (rotateAngle >= 360) {
+		rotateAngle = 0;
 	}
+
+	theRobot->Prepare(dt);
 }
 
 void CGfxOpenGL::Render() {
@@ -179,13 +187,13 @@ void CGfxOpenGL::Render() {
 	//gluLookAt(0.0f, 0.0f, 20.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 
-	glTranslatef(0.4f, 0.0f, -1.5f);
+	//glTranslatef(0.4f, 0.0f, -1.5f);
 	//glRotated(m_angle, 0.0f, 0.0f, 1.0f);//绕着z轴转
-	glRotated(15.0, 1.0f, 0.0f, 0.0f);
+	/*glRotated(15.0, 1.0f, 0.0f, 0.0f);
 	glRotated(30.0, 0.0f, 1.0f, 0.0f);
-	glScalef(0.75, 0.75, 0.75);
+	glScalef(0.75, 0.75, 0.75);*/
 
-	DrawCube(0.0, 0.0, 0.0);
+	//DrawCube(0.0, 0.0, 0.0);
 
 	//glColor3f(7.0f, 1.0f, 0.3f);
 
@@ -253,4 +261,15 @@ void CGfxOpenGL::Render() {
 	glColor3f(0.0f, 0.0f, 1.0f);
 	glVertex3f(3.0, 5.0, 0.0);
 	glEnd();*/
+
+	glShadeModel(GL_FLAT);//颜色的单调模式，画顶点时 只能用一种颜色。直线、三角形、四边形最后一个点的颜色，线段使用的分线段中的第二个颜色。多边形使用的第一个顶点颜色。GL_SMOOTH平滑，差值渐变
+
+
+	glPushMatrix();//把模型视图矩阵压栈。会把当前状态压入第二层，不过此时栈顶的矩阵也与第二层的相同
+		glLoadIdentity();
+		glTranslatef(0.0f, 0.0f, -30.0f);
+		glRotated(rotateAngle, 0.0f, 1.0f, 0.0f);
+		theRobot->DrawRobot(0.0, 0.0, 0.0);
+
+	glPopMatrix();//当经过一系列的变换后，栈顶矩阵被修改，此时调用glPopMatrix()时，栈顶矩阵被弹出，且又会恢复为原来的状态。
 }

@@ -5,13 +5,14 @@
 #define TWO_PI PI*2.0
 #define HALF_PI PI/2.0
 
+class Robot;
+
 class CGfxOpenGL {
 private:
+	Robot * theRobot;
 	int m_windowWidth;
 	int m_windowHeight;
-
-	float m_angle;
-
+	float rotateAngle;
 public:
 	CGfxOpenGL();
 	virtual ~CGfxOpenGL();

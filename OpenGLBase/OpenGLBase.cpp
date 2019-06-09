@@ -3,7 +3,6 @@
 
 #include "stdafx.h"
 #include "OpenGLBase.h"
-#include "CGfxOpenGL.h"
 
 #define MAX_LOADSTRING 100
 
@@ -21,6 +20,7 @@ long windowWidth = 800;
 long windowHeight = 600;
 
 CGfxOpenGL *g_glRender = NULL;
+HiResTimer *g_hiResTimer = NULL;
 
 void SetupPixelFormat(HDC hDC) {//设置像素格式，窗口使用的像素格式。opengl与设备关联
 
@@ -73,6 +73,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	// TODO: Place code here.
 	g_glRender = new CGfxOpenGL();
+	g_hiResTimer = new HiResTimer();
+
 
 	// Initialize global strings
 	LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -100,9 +102,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	}*/
 	g_glRender->Init();
-
+	g_hiResTimer->Init();
 	while (!exiting) {
-		g_glRender->Prepare(0.0f);
+		g_glRender->Prepare(g_hiResTimer->GetElapsedSecond(1));
 		g_glRender->Render();
 		SwapBuffers(g_HDC);//把刚才画到后台的，交换到前台
 
